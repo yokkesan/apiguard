@@ -1,9 +1,11 @@
 package analyzer
 
 type Issue struct {
+	Code    string
 	File    string
 	Message string
 	Level   string
+	Line    int
 }
 
 type Analyzer interface {

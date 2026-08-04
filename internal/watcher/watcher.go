@@ -29,11 +29,7 @@ func Watch(path string) error {
 			issues := analyzer.Analyze(event.Name)
 
 			for _, issue := range issues {
-				fmt.Printf("[%s] %s: %s\n",
-					issue.Level,
-					issue.File,
-					issue.Message,
-				)
+				analyzer.Report(issue)
 			}
 
 		case err := <-watcher.Errors:

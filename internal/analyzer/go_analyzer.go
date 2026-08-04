@@ -11,7 +11,7 @@ type GoAnalyzer struct{}
 func (g GoAnalyzer) Analyze(path string) []Issue {
 	fs := token.NewFileSet()
 
-	_, err := parser.ParseFile(
+	node, err := parser.ParseFile(
 		fs,
 		path,
 		nil,
@@ -28,11 +28,7 @@ func (g GoAnalyzer) Analyze(path string) []Issue {
 		}
 	}
 
-	return []Issue{
-		{
-			File:    path,
-			Message: "Go analysis completed",
-			Level:   "INFO",
-		},
-	}
+	issues := DetectSecret(node, path, fs)
+
+	return issues
 }
