@@ -30,5 +30,9 @@ func (g GoAnalyzer) Analyze(path string) []Issue {
 
 	issues := DetectSecret(node, path, fs)
 
+	sqlIssues := DetectSQLInjection(node, path, fs)
+
+	issues = append(issues, sqlIssues...)
+
 	return issues
 }
