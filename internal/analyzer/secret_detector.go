@@ -9,7 +9,11 @@ import (
 
 type SecretDetector struct{}
 
-func (SecretDetector) Detect(node ast.Node, file string, fs *token.FileSet) []Issue {
+func (SecretDetector) Detect(
+	node ast.Node,
+	file string,
+	context *AnalysisContext,
+) []Issue {
 	var issues []Issue
 
 	ast.Inspect(node, func(n ast.Node) bool {
@@ -47,7 +51,7 @@ func (SecretDetector) Detect(node ast.Node, file string, fs *token.FileSet) []Is
 				Level:   "WARNING",
 				Message: "Hard-coded secret detected",
 				File:    file,
-				Line:    fs.Position(assign.Pos()).Line,
+				Line:    context.FileSet.Position(assign.Pos()).Line,
 			})
 		}
 

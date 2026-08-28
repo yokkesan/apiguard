@@ -1,10 +1,11 @@
 package analyzer
 
-import (
-	"go/ast"
-	"go/token"
-)
+import "go/ast"
 
 type Detector interface {
-	Detect(node ast.Node, file string, fs *token.FileSet) []Issue
+	Detect(
+		node ast.Node,
+		file string,
+		context *AnalysisContext,
+	) []Issue
 }

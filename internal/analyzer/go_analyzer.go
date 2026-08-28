@@ -17,48 +17,64 @@ func NewGoAnalyzer(detectors ...Detector) *GoAnalyzer {
 	}
 }
 
-func (g *GoAnalyzer) Analyze(path string) []Issue {
+func (g *GoAnalyzer) AnalyzeFiles(paths []string) []Issue {
 	fs := token.NewFileSet()
-
-	node, err := parser.ParseFile(
-		fs,
-		path,
-		nil,
-		parser.ParseComments,
-	)
-	if err != nil {
-		return []Issue{
-			{
-				Level:   "ERROR",
-				Message: fmt.Sprintf("parse error: %v", err),
-				File:    path,
-			},
-		}
-	}
+	context := NewAnalysisContext(fs)
 
 	var issues []Issue
 
-	for _, detector := range g.detectors {
-		detected := detector.Detect(node, path, fs)
-		issues = append(issues, detected...)
-	}
+	for _, path := range paths {
+		node, err := parser.ParseFile(
+			fs,
+			path,
+			nil,
+			parser.ParseComments,
+		)
 
-	routes := DetectGinRoutes(node, fs)
+		if err != nil {
+			issues = append(issues, Issue{
+				Level:   "ERROR",
+				Message: fmt.Sprintf("parse error: %v", err),
+				File:    path,
+			})
 
-	for _, route := range routes {
-		message := route.Method + " " + route.Path + " -> " + route.Handler
-
-		if len(route.Middlewares) > 0 {
-			message += " middleware: " + strings.Join(route.Middlewares, ", ")
+			continue
 		}
 
-		issues = append(issues, Issue{
-			Code:    "INFO-ROUTE-001",
-			Level:   "INFO",
-			Message: message,
-			File:    path,
-			Line:    route.Line,
-		})
+		context.AddFile(path, node)
+	}
+
+	for _, file := range context.Files {
+		for _, detector := range g.detectors {
+			detected := detector.Detect(
+				file.Node,
+				file.Path,
+				context,
+			)
+
+			issues = append(issues, detected...)
+		}
+
+		routes := DetectGinRoutes(
+			file.Node,
+			context.FileSet,
+		)
+
+		for _, route := range routes {
+			message := route.Method + " " + route.Path + " -> " + route.Handler
+
+			if len(route.Middlewares) > 0 {
+				message += " middleware: " + strings.Join(route.Middlewares, ", ")
+			}
+
+			issues = append(issues, Issue{
+				Code:    "INFO-ROUTE-001",
+				Level:   "INFO",
+				Message: message,
+				File:    file.Path,
+				Line:    route.Line,
+			})
+		}
 	}
 
 	return issues

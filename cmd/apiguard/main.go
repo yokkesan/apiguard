@@ -45,14 +45,10 @@ func runScan(args []string) {
 	goAnalyzer := analyzer.NewGoAnalyzer(
 		analyzer.SecretDetector{},
 		analyzer.SQLDetector{},
+		analyzer.AuthDetector{},
 	)
 
-	var issues []analyzer.Issue
-
-	for _, file := range files {
-		fileIssues := goAnalyzer.Analyze(file)
-		issues = append(issues, fileIssues...)
-	}
+	issues := goAnalyzer.AnalyzeFiles(files)
 
 	analyzer.Report(issues)
 }

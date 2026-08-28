@@ -1,4 +1,4 @@
-package tmp
+package gin
 
 func Routes() {
 	router.GET("/users", authMiddleware, getUsers)

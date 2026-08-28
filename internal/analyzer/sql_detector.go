@@ -8,7 +8,11 @@ import (
 
 type SQLDetector struct{}
 
-func (SQLDetector) Detect(node ast.Node, file string, fs *token.FileSet) []Issue {
+func (SQLDetector) Detect(
+	node ast.Node,
+	file string,
+	context *AnalysisContext,
+) []Issue {
 	var issues []Issue
 
 	ast.Inspect(node, func(n ast.Node) bool {
@@ -30,7 +34,7 @@ func (SQLDetector) Detect(node ast.Node, file string, fs *token.FileSet) []Issue
 			Level:   "WARNING",
 			Message: "SQL string concatenation detected",
 			File:    file,
-			Line:    fs.Position(binaryExpr.Pos()).Line,
+			Line:    context.FileSet.Position(binaryExpr.Pos()).Line,
 		})
 
 		return true
