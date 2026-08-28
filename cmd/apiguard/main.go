@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"os"
 
-	"apiguard/internal/analyzer"
+	"github.com/yokkesan/apiguard/internal/analyzer"
 )
 
 func main() {
@@ -36,9 +36,20 @@ func runScan(args []string) {
 
 	target := args[0]
 
+	files, err := analyzer.FindGoFiles(target)
+	if err != nil {
+		fmt.Printf("failed to find Go files: %v\n", err)
+		os.Exit(1)
+	}
+
 	goAnalyzer := analyzer.NewGoAnalyzer()
 
-	issues := goAnalyzer.Analyze(target)
+	var issues []analyzer.Issue
+
+	for _, file := range files {
+		fileIssues := goAnalyzer.Analyze(file)
+		issues = append(issues, fileIssues...)
+	}
 
 	analyzer.Report(issues)
 }
