@@ -42,7 +42,10 @@ func runScan(args []string) {
 		os.Exit(1)
 	}
 
-	goAnalyzer := analyzer.NewGoAnalyzer()
+	goAnalyzer := analyzer.NewGoAnalyzer(
+		analyzer.SecretDetector{},
+		analyzer.SQLDetector{},
+	)
 
 	var issues []analyzer.Issue
 
