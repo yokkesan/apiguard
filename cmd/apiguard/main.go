@@ -46,6 +46,7 @@ func runScan(args []string) {
 		analyzer.SecretDetector{},
 		analyzer.SQLDetector{},
 		analyzer.AuthDetector{},
+		analyzer.ValidationDetector{},
 	)
 
 	issues := goAnalyzer.AnalyzeFiles(files)
